@@ -1,0 +1,24 @@
+---
+- name: Create directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/transmission
+    - /opt/containers/transmission/config
+    - "{{transmission_data_path}}/downloads"
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/transmission/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/transmission
+    state: present
+

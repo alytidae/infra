@@ -1,0 +1,22 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: "{{ uid.stdout | int }}:{{ gid.stdout | int }}"
+    volumes:
+      - /opt/containers/jellyfin/config:/config
+      - /opt/containers/jellyfin/cache:/cache
+      - {{arr_media_path}}:/media
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`films.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true

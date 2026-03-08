@@ -1,0 +1,63 @@
+---
+services:
+  broker:
+    image: docker.io/library/redis:8
+    restart: unless-stopped
+    networks:
+      - internal-nw
+    volumes:
+      - redisdata:/data
+
+  db:
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    networks:
+      - internal-nw
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    container_name: paperless
+    depends_on:
+      - db
+      - broker
+    volumes:
+      - /opt/containers/paperless/data:/usr/src/paperless/data
+      - /opt/containers/paperless/export:/usr/src/paperless/export
+      - {{paperless_media_pass}}:/usr/src/paperless/media
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      USERMAP_UID: "{{ uid.stdout | int }}"
+      USERMAP_GID: "{{ gid.stdout | int }}"
+      PAPERLESS_FILENAME_FORMAT: '{{"{{"}} correspondent }}/{{"{{"}} created_year }}/{{"{{"}} title }}'
+      PAPERLESS_ADMIN_USER: "{{paperless_username}}"
+      PAPERLESS_ADMIN_PASSWORD: "{{paperless_password}}"
+      PAPERLESS_ADMIN_MAIL: "{{paperless_email}}"
+      PAPERLESS_URL: "https://papers.{{ duckdns_domain }}.duckdns.org"
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://papers.{{ duckdns_domain }}.duckdns.org"
+    networks:
+      - proxy-nw
+      - internal-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperless.rule=Host(`papers.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.paperless.entrypoints=websecure"
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true
+  internal-nw:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,31 @@
+---
+- name: Install Restic
+  apt:
+    name: restic
+    state: present
+    update_cache: yes
+
+- name: Create backup directory
+  file:
+    path: /opt/backups
+    state: directory
+    mode: '0700'
+
+- name: Generate Restic configuration from template
+  template:
+    src: backup.conf.j2
+    dest: /opt/backups/restic.env
+    mode: '0600'
+
+- name: Generate backup script from template
+  template:
+    src: backup.sh.j2
+    dest: /opt/backups/backup.sh
+    mode: '0700'
+
+- name: Setup daily cron job for backups
+  cron:
+    name: "Daily Restic Backup"
+    minute: "0"
+    hour: "4"
+    job: "/opt/backups/backup.sh > /dev/null 2>&1"

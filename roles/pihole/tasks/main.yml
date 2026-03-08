@@ -1,0 +1,17 @@
+---
+- name: Create directory for the application
+  file:
+    path: /opt/containers/pihole
+    state: directory
+    mode: '0755'
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/pihole/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/pihole
+    state: present

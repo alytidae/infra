@@ -1,0 +1,46 @@
+---
+- name: Download Tailscale GPG key
+  get_url:
+    url: "https://pkgs.tailscale.com/stable/debian/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: '0644'
+    force: yes
+
+- name: Add Tailscale repository
+  copy:
+    dest: /etc/apt/sources.list.d/tailscale.list
+    content: |
+      deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/debian {{ ansible_facts['distribution_release'] }} main
+    mode: '0644'
+
+- name: Install Tailscale package
+  apt:
+    name: tailscale
+    state: present
+    update_cache: yes
+
+- name: Enable and start Tailscale service
+  service:
+    name: tailscaled
+    state: started
+    enabled: yes
+
+- name: Check if Tailscale is already up
+  command: tailscale status
+  register: tailscale_check
+  failed_when: false
+  changed_when: false
+
+- name: Authenticate Tailscale if it is down
+  command: tailscale up --authkey={{ tailscale_auth_key }}
+  when: tailscale_check.rc != 0
+
+- name: Refresh facts to discover tailscale0 interface
+  setup:
+    gather_subset:
+      - network
+
+- name: Save Tailscale IP as a variable
+  set_fact:
+    tailscale_ip: "{{ ansible_facts['tailscale0']['ipv4']['address'] }}"
+  when: ansible_facts['tailscale0'] is defined

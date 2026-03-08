@@ -1,0 +1,81 @@
+---
+- name: Update all packages to their latest version
+  apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: Set system hostname
+  hostname:
+    name: "{{ hostname }}"
+
+- name: Update /etc/hosts with the new hostname
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127.0.1.1'
+    line: "127.0.1.1 {{ hostname }}"
+    state: present
+
+- name: Set root password
+  user:
+    name: root
+    password: "{{ root_password | password_hash('sha512') }}"
+    update_password: always
+  when: root_password != ""
+
+- name: Create the admin user
+  user:
+    name: "{{ admin_username }}"
+    password: "{{ admin_password | password_hash('sha512') }}"
+    update_password: always
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    create_home: yes
+  when: admin_password != ""
+
+- name: Get uid
+  command: "id -u {{ admin_username }}"
+  register: uid
+  changed_when: false
+
+- name: Get gid
+  command: "id -g {{ admin_username }}"
+  register: gid
+  changed_when: false
+
+- name: Allow admin user to use sudo
+  copy:
+    dest: "/etc/sudoers.d/{{ admin_username }}"
+    content: "{{ admin_username }} ALL=(ALL) ALL"
+    mode: '0440'
+    validate: 'visudo -cf %s'
+
+- name: Ensure mount directories exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ storage_disks }}"
+  when: storage_disks is defined
+
+- name: Mount storage disks via UUID in fstab
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "UUID={{ item.uuid }}"
+    fstype: "{{ item.fstype }}"
+    opts: defaults,noatime
+    state: mounted
+  loop: "{{ storage_disks }}"
+  when: storage_disks is defined
+
+- name: Make admin the owner of mounted disks
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ admin_username }}"
+    group: "{{ admin_username }}"
+    recurse: true
+  loop: "{{ storage_disks }}"
+  when:
+    - storage_disks is defined
+    - item.chown | default(false)

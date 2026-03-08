@@ -1,0 +1,28 @@
+---
+- name: Create directory structure for Jellyfin
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/jellyfin
+    - /opt/containers/jellyfin/config
+    - /opt/containers/jellyfin/cache
+    - "{{arr_media_path}}"
+    - "{{arr_media_path}}/tvshows"
+    - "{{arr_media_path}}/movies"
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/jellyfin/docker-compose.yml
+    mode: '0644'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/jellyfin
+    state: present

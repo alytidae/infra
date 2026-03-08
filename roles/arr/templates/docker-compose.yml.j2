@@ -1,0 +1,73 @@
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID={{ uid.stdout }}
+      - PGID={{ gid.stdout }}
+      - TZ=Europe/Madrid
+    volumes:
+      - /opt/containers/arr/prowlarr_config:/config
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.rule=Host(`search.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.prowlarr.entrypoints=websecure"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+      - "traefik.docker.network=proxy-nw"
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID={{ uid.stdout }}
+      - PGID={{ gid.stdout }}
+      - TZ=Europe/Madrid
+    volumes:
+      - /opt/containers/arr/radarr_config:/config
+      - {{arr_media_path}}:/data
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+      - "traefik.docker.network=proxy-nw"
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID={{ uid.stdout }}
+      - PGID={{ gid.stdout }}
+      - TZ=Europe/Madrid
+    volumes:
+      - /opt/containers/arr/sonarr_config:/config
+      - {{arr_media_path}}:/data
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+      - "traefik.docker.network=proxy-nw"
+
+  flaresolverr:
+      image: ghcr.io/flaresolverr/flaresolverr:latest
+      container_name: flaresolverr
+      environment:
+        - LOG_LEVEL=info
+        - TZ=Etc/UTC
+      restart: unless-stopped
+      networks:
+        - proxy-nw
+
+networks:
+  proxy-nw:
+    external: true

@@ -1,0 +1,22 @@
+---
+- name: Setup Debian server infrastructure
+  hosts: servers
+  become: yes
+
+  roles:
+    - system
+    - security
+    - tailscale
+    - raid
+    - backup
+    - docker
+
+    - whoami
+    - pihole
+    - traefik
+    - copyparty
+    - paperless-ngx
+    - transmission
+    - arr
+    - jellyfin
+    - actualbudget

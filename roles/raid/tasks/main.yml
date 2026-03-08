@@ -1,0 +1,45 @@
+---
+- name: Install SnapRAID
+  apt:
+    name: snapraid
+    state: present
+    update_cache: yes
+
+- name: Generate SnapRAID configuration from template
+  template:
+    src: snapraid.conf.j2
+    dest: /etc/snapraid.conf
+    mode: '0644'
+
+- name: Create raid scripts directory
+  file:
+    path: /opt/raid
+    state: directory
+    mode: '0700'
+
+- name: Generate SnapRAID sync script
+  template:
+    src: snapraid-sync.sh.j2
+    dest: /opt/raid/snapraid-sync.sh
+    mode: '0700'
+
+- name: Generate SnapRAID scrub script
+  template:
+    src: snapraid-scrub.sh.j2
+    dest: /opt/raid/snapraid-scrub.sh
+    mode: '0700'
+
+- name: Setup daily cron job for SnapRAID
+  cron:
+    name: "Daily SnapRAID Sync"
+    minute: "0"
+    hour: "2"
+    job: "/opt/raid/snapraid-sync.sh > /dev/null 2>&1"
+
+- name: Setup weekly cron job for SnapRAID scrub
+  cron:
+    name: "Weekly SnapRAID Scrub"
+    minute: "0"
+    hour: "3"
+    weekday: "4"
+    job: "/opt/raid/snapraid-scrub.sh > /dev/null 2>&1"

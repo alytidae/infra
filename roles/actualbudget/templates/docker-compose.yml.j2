@@ -1,0 +1,27 @@
+services:
+  actual_server:
+    container_name: actualbudget
+    image: docker.io/actualbudget/actual-server:latest
+    environment:
+      ACTUAL_LOGIN_METHOD: "header"
+    volumes:
+      - /opt/containers/actualbudget/data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.finance.rule=Host(`finance.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.finance.entrypoints=websecure"
+      - "traefik.http.services.finance.loadbalancer.server.port=5006"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true

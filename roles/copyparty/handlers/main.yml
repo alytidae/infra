@@ -1,0 +1,5 @@
+---
+- name: restart copyparty
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/copyparty
+    state: restarted

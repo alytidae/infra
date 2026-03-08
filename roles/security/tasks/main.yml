@@ -1,0 +1,48 @@
+---
+- name: Install security packages
+  apt:
+    name:
+      - fail2ban
+      - ufw
+    state: present
+    update_cache: yes
+
+- name: Configure UFW default deny incoming
+  ufw:
+    direction: incoming
+    policy: deny
+
+- name: Configure UFW default allow outgoing
+  ufw:
+    direction: outgoing
+    policy: allow
+
+- name: Allow SSH through UFW
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Enable UFW firewall
+  ufw:
+    state: enabled
+
+- name: Disable SSH password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: Restart SSH
+
+- name: Disable SSH root login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: Restart SSH
+
+- name: Enable and start Fail2ban
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes

@@ -1,0 +1,32 @@
+---
+- name: Create directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/copyparty
+    - /opt/containers/copyparty/hists
+
+- name: Deploy copyparty configuration file
+  template:
+    src: copyparty.conf.j2
+    dest: /opt/containers/copyparty/copyparty.conf 
+    mode: '0644'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  notify: restart copyparty
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/copyparty/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/copyparty
+    state: present
+

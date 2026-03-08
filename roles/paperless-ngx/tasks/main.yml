@@ -1,0 +1,24 @@
+---
+- name: Create Paperless directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/paperless
+    - /opt/containers/paperless/data
+    - /opt/containers/paperless/export
+    - "{{ paperless_media_pass }}"
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/paperless/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/paperless
+    state: present

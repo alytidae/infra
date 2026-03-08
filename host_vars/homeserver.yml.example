@@ -1,0 +1,65 @@
+---
+# system
+admin_username: "admin"
+admin_password: "admin"
+root_password: "root"
+hostname: "homeserver"
+
+storage_disks:
+  - path: /mnt/disk1
+    uuid: ""
+    fstype: ext4
+    chown: true
+  - path: /mnt/parity1
+    uuid: ""
+    fstype: ext4
+    chown: false
+
+# tailscale
+tailscale_auth_key: ""
+
+# raid - snapraid
+snapraid_parity_disk: /mnt/parity1
+snapraid_data_disks:
+  - /mnt/disk1
+
+# duckdns
+duckdns_token: ""
+duckdns_domain: ""
+
+# backup - restic
+restic_backup_paths:
+  - /mnt/disk1/photos
+  - /mnt/disk1/documents
+  - /mnt/disk1/torrents_watch
+
+restic_config_aws_access_key_id: ""
+restic_config_aws_secret_access_key: ""
+restic_config_repository: ""
+restic_config_password: ""
+
+# pihole
+pihole_password: "admin"
+pihole_dns_upstreams:
+  - 9.9.9.9
+  - 149.112.112.112
+
+# copyparty
+copyparty_username: "admin"
+copyparty_password: "admin"
+copyparty_media_path: "/mnt"
+
+# transmission
+transmission_username: "admin"
+transmission_password: "admin"
+transmission_data_path: /mnt/disk1/media # for arr stack, in web change the download path to /data/downloads
+
+# paperless-ngx
+paperless_username: "admin"
+paperless_email: "admin@example.com"
+paperless_password: "admin"
+paperless_media_pass: "/mnt/disk1/paperless_media"
+
+# arr - Radarr, Sonarr
+arr_media_path: "/mnt/disk1/media"
+

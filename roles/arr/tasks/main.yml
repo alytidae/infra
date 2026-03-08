@@ -1,0 +1,26 @@
+---
+- name: Create directory structure for media stack
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/arr
+    - /opt/containers/arr/radarr_config
+    - /opt/containers/arr/sonarr_config
+    - /opt/containers/arr/prowlarr_config
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/arr/docker-compose.yml
+    mode: '0644'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/arr
+    state: present

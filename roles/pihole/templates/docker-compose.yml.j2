@@ -1,0 +1,29 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "{{ tailscale_ip }}:53:53/tcp"
+      - "{{ tailscale_ip }}:53:53/udp"
+    environment:
+      FTLCONF_webserver_api_password: "{{pihole_password}}"
+      FTLCONF_dns_listeningMode: "ALL"
+      FTLCONF_dns_upstreams: "{{ pihole_dns_upstreams | join(';') }}"
+      FTLCONF_dns_hosts: "{% for domain in pihole_dns_domains %}{{ tailscale_ip }} {{ domain }};{% endfor %}"
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true
+

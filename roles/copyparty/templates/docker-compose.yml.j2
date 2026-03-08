@@ -1,0 +1,21 @@
+services:
+  copyparty:
+    image: copyparty/ac:latest
+    container_name: copyparty
+    user: "{{ uid.stdout | int }}:{{ gid.stdout | int }}"
+    volumes:
+      - /opt/containers/copyparty:/cfg
+      - {{copyparty_media_path}}:/media
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.copyparty.rule=Host(`files.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.copyparty.entrypoints=websecure"
+      - "traefik.http.services.copyparty.loadbalancer.server.port=3923"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true

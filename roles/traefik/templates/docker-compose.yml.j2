@@ -1,0 +1,42 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    restart: unless-stopped
+    environment:
+      - DUCKDNS_TOKEN={{ duckdns_token }}
+    ports:
+      - "{{ tailscale_ip }}:80:80"
+      - "{{ tailscale_ip }}:443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "traefik-certs:/letsencrypt"
+    networks:
+      - proxy-nw
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker.network=proxy-nw"
+      
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      
+      - "--entrypoints.websecure.http.tls.certResolver=myresolver"
+      
+      - "--entrypoints.websecure.http.tls.domains[0].main={{ duckdns_domain }}.duckdns.org"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.{{ duckdns_domain }}.duckdns.org"
+
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.delaybeforecheck=120"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.disablepropagationcheck=true"
+
+networks:
+  proxy-nw:
+    external: true
+
+volumes:
+  traefik-certs:
