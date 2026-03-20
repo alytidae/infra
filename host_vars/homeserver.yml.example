@@ -63,3 +63,5 @@ paperless_media_pass: "/mnt/disk1/paperless_media"
 # arr - Radarr, Sonarr
 arr_media_path: "/mnt/disk1/media"
 
+# syncthing
+obsidian_path: "/mnt/disk1/obsidian"
