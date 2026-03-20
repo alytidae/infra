@@ -67,15 +67,3 @@
     state: mounted
   loop: "{{ storage_disks }}"
   when: storage_disks is defined
-
-- name: Make admin the owner of mounted disks
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: "{{ admin_username }}"
-    group: "{{ admin_username }}"
-    recurse: true
-  loop: "{{ storage_disks }}"
-  when:
-    - storage_disks is defined
-    - item.chown | default(false)
