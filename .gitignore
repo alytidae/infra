@@ -1,2 +1,4 @@
 host_vars/homeserver.yml
+host_vars/homeserver.yml.prod
+host_vars/homeserver.yml.demo
 inventory.ini
