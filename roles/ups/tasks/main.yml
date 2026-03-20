@@ -1,0 +1,51 @@
+- name: Install NUT and USB utilities
+  ansible.builtin.apt:
+    name:
+      - nut
+      - nut-client
+      - nut-server
+      - usbutils
+    state: present
+    update_cache: true
+
+- name: Set standalone mode in nut.conf
+  ansible.builtin.lineinfile:
+    path: /etc/nut/nut.conf
+    regexp: '^MODE='
+    line: 'MODE=standalone'
+    state: present
+
+- name: Configure UPS device in ups.conf
+  ansible.builtin.blockinfile:
+    path: /etc/nut/ups.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: {{ ups_name }}"
+    block: |
+      [{{ ups_name }}]
+          driver = {{ ups_driver }}
+          port = {{ ups_port }}
+          desc = "Homelab UPS"
+
+- name: Configure UPS daemon users in upsd.users
+  ansible.builtin.blockinfile:
+    path: /etc/nut/upsd.users
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: upsmon"
+    block: |
+      [upsmon]
+          password = {{ ups_password }}
+          upsmon master
+
+- name: Configure UPS monitor in upsmon.conf
+  ansible.builtin.lineinfile:
+    path: /etc/nut/upsmon.conf
+    regexp: '^MONITOR '
+    line: 'MONITOR {{ ups_name }}@localhost 1 upsmon {{ ups_password }} master'
+    state: present
+
+- name: Enable and restart NUT services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: restarted
+  loop:
+    - nut-server
+    - nut-client

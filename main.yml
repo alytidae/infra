@@ -10,6 +10,7 @@
     - raid
     - backup
     - docker
+    - ups
 
     - whoami
     - pihole
