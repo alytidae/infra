@@ -65,3 +65,9 @@ arr_media_path: "/mnt/disk1/media"
 
 # syncthing
 obsidian_path: "/mnt/disk1/obsidian"
+
+# ups
+ups_name: "myups"
+ups_driver: "usbhid-ups"
+ups_port: "auto"
+ups_password: "admin"
