@@ -9,7 +9,6 @@ services:
       FTLCONF_webserver_api_password: "{{pihole_password}}"
       FTLCONF_dns_listeningMode: "ALL"
       FTLCONF_dns_upstreams: "{{ pihole_dns_upstreams | join(';') }}"
-      FTLCONF_dns_hosts: "{% for domain in pihole_dns_domains %}{{ tailscale_ip }} {{ domain }};{% endfor %}"
     volumes:
       - './etc-pihole:/etc/pihole'
       - './etc-dnsmasq.d:/etc/dnsmasq.d'
