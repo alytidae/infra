@@ -1,0 +1,31 @@
+---
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    user: "{{ uid.stdout }}:{{ gid.stdout }}"
+    volumes:
+      - /opt/containers/syncthing/config:/var/syncthing/config
+      - {{ obsidian_path }}:/var/syncthing/Obsidian
+    ports:
+      - "22000:22000/tcp"
+      - "22000:22000/udp"
+      - "21027:21027/udp"
+    restart: unless-stopped
+    healthcheck:
+      test: curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o --color=never OK || exit 1
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.syncthing.rule=Host(`syncthing.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.syncthing.entrypoints=websecure"
+      - "traefik.http.services.syncthing.loadbalancer.server.port=8384"
+      - "traefik.docker.network=proxy-nw"
+
+networks:
+  proxy-nw:
+    external: true

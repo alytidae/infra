@@ -1,0 +1,35 @@
+---
+- name: Create Syncthing directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+  loop:
+    - /opt/containers/syncthing
+    - /opt/containers/syncthing/config
+    - "{{ obsidian_path }}"
+
+- name: Create .stignore for Obsidian
+  ansible.builtin.copy:
+    dest: "{{ obsidian_path }}/.stignore"
+    content: |
+      .obsidian/workspace.json
+      .obsidian/workspace-mobile.json
+      .obsidian/workspace
+      .trash/
+    mode: '0644'
+    owner: "{{ uid.stdout }}"
+    group: "{{ gid.stdout }}"
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/syncthing/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/syncthing
+    state: present
