@@ -4,6 +4,16 @@
     upgrade: dist
     update_cache: yes
 
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - vim
+      - htop
+      - btop
+      - tmux
+    state: present
+    update_cache: true
+
 - name: Set system hostname
   hostname:
     name: "{{ hostname }}"
