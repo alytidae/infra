@@ -68,6 +68,58 @@ services:
       networks:
         - proxy-nw
 
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID={{ uid.stdout }}
+      - PGID={{ gid.stdout }}
+      - TZ=Europe/Madrid
+    volumes:
+      - /opt/containers/arr/bazarr_config:/config
+      - {{arr_media_path}}:/data
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.bazarr.entrypoints=websecure"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+      - "traefik.docker.network=proxy-nw"
+      
+      - "homepage.group=Media Stack"
+      - "homepage.name=Bazarr"
+      - "homepage.icon=bazarr.png"
+      - "homepage.href=https://bazarr.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Subtitle Manager"
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment:
+      - PUID={{ uid.stdout }}
+      - PGID={{ gid.stdout }}
+      - TZ=Europe/Madrid
+    volumes:
+      - /opt/containers/arr/lidarr_config:/config
+      - {{arr_media_path}}:/data
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.lidarr.entrypoints=websecure"
+      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
+      - "traefik.docker.network=proxy-nw"
+      
+      - "homepage.group=Media Stack"
+      - "homepage.name=Lidarr"
+      - "homepage.icon=lidarr.png"
+      - "homepage.href=https://lidarr.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Music Collection Manager"
+
 networks:
   proxy-nw:
     external: true

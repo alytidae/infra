@@ -11,6 +11,8 @@
     - /opt/containers/arr/radarr_config
     - /opt/containers/arr/sonarr_config
     - /opt/containers/arr/prowlarr_config
+    - /opt/containers/arr/bazarr_config
+    - /opt/containers/arr/lidarr_config
 
 - name: Deploy docker-compose file from template
   template:
