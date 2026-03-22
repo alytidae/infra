@@ -22,6 +22,12 @@ services:
       - "traefik.http.services.finance.loadbalancer.server.port=5006"
       - "traefik.docker.network=proxy-nw"
 
+      - "homepage.group=Productivity"
+      - "homepage.name=Actual Budget"
+      - "homepage.icon=actualbudget.png"
+      - "homepage.href=https://finance.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Budget App"
+
 networks:
   proxy-nw:
     external: true

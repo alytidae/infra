@@ -52,6 +52,12 @@ services:
       - "traefik.http.services.paperless.loadbalancer.server.port=8000"
       - "traefik.docker.network=proxy-nw"
 
+      - "homepage.group=Productivity"
+      - "homepage.name=Paperless-ngx"
+      - "homepage.icon=paperless-ngx.png"
+      - "homepage.href=https://papers.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Document Manager"
+
 networks:
   proxy-nw:
     external: true

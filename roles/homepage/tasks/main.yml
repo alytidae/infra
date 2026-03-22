@@ -14,6 +14,20 @@
       my-docker:
         socket: /var/run/docker.sock
 
+- name: Create empty services.yaml to prevent default example groups
+  copy:
+    dest: /opt/containers/homepage/config/services.yaml
+    mode: '0644'
+    content: |
+      ---
+
+- name: Create empty bookmarks.yaml to prevent default example bookmarks
+  copy:
+    dest: /opt/containers/homepage/config/bookmarks.yaml
+    mode: '0644'
+    content: |
+      ---
+
 - name: Deploy docker-compose file from template
   template:
     src: docker-compose.yml.j2

@@ -17,6 +17,12 @@ services:
       - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
       - "traefik.docker.network=proxy-nw"
 
+      - "homepage.group=Media Stack"
+      - "homepage.name=Jellyfin"
+      - "homepage.icon=jellyfin.png"
+      - "homepage.href=https://films.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Media Server"
+
 networks:
   proxy-nw:
     external: true

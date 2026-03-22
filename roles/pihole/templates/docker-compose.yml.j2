@@ -22,6 +22,12 @@ services:
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy-nw"
 
+      - "homepage.group=Infrastructure"
+      - "homepage.name=Pihole"
+      - "homepage.icon=pihole.png"
+      - "homepage.href=https://pihole.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=DNS Sinkhole"
+
 networks:
   proxy-nw:
     external: true
