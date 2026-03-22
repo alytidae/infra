@@ -1,0 +1,27 @@
+---
+- name: Create directory for the application
+  file:
+    path: /opt/containers/homepage
+    state: directory
+    mode: '0755'
+
+- name: Create docker.yaml for auto-discovery
+  copy:
+    dest: /opt/containers/homepage/config/docker.yaml
+    mode: '0644'
+    content: |
+      ---
+      my-docker:
+        socket: /var/run/docker.sock
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/homepage/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/homepage
+    state: present
+
