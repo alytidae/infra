@@ -1,0 +1,49 @@
+services:
+  beszel:
+    image: henrygd/beszel
+    container_name: beszel
+    restart: unless-stopped
+    environment:
+      - APP_URL=http://localhost:8090
+    volumes:
+      - ./beszel_data:/beszel_data
+    networks:
+      - proxy-nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.beszel.rule=Host(`beszel.{{ duckdns_domain }}.duckdns.org`)"
+      - "traefik.http.routers.beszel.entrypoints=websecure"
+      - "traefik.http.services.beszel.loadbalancer.server.port=8090"
+      - "traefik.docker.network=proxy-nw"
+
+      - "homepage.group=Infrastructure"
+      - "homepage.name=Beszel"
+      - "homepage.href=https://beszel.{{ duckdns_domain }}.duckdns.org"
+      - "homepage.description=Server monitoring hub"
+      - "homepage.icon=monitor.png"
+
+  beszel-agent: 
+    image: henrygd/beszel-agent:alpine 
+    container_name: beszel-agent 
+    restart: unless-stopped 
+    networks:
+      - proxy-nw
+    devices:
+{% for device in beszel_smart_devices %}
+      - "{{ device }}"
+{% endfor %}
+    cap_add: 
+      - SYS_RAWIO 
+      - SYS_ADMIN 
+    volumes: 
+      - ./beszel_agent_data:/var/lib/beszel-agent 
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    environment: 
+      LISTEN: "45876" 
+      KEY: "{{ beszel_agent_key }}"
+      HUB_URL: "https://beszel.{{ duckdns_domain }}.duckdns.org"
+      TOKEN: "{{ beszel_agent_token }}"
+
+networks:
+  proxy-nw:
+    external: true

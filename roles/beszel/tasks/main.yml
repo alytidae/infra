@@ -1,0 +1,21 @@
+---
+- name: Create directory structure for beszel
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/containers/beszel
+    - /opt/containers/beszel/beszel_data
+    - /opt/containers/beszel/beszel_agent_data
+
+- name: Deploy docker-compose file from template
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/containers/beszel/docker-compose.yml
+    mode: '0644'
+
+- name: Start the container stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/containers/beszel
+    state: present

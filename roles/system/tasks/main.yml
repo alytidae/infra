@@ -11,6 +11,7 @@
       - htop
       - btop
       - tmux
+      - smartmontools
     state: present
     update_cache: true
 

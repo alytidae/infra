@@ -71,3 +71,12 @@ ups_name: "myups"
 ups_driver: "usbhid-ups"
 ups_port: "auto"
 ups_password: "admin"
+
+# beszel
+beszel_smart_devices:
+  - "/dev/sda:/dev/sda"
+  - "/dev/sdb:/dev/sdb"
+  - "/dev/sdc:/dev/sdc"
+  - "/dev/nvme0n1:/dev/nvme0" # https://www.beszel.dev/guide/smart-data
+beszel_agent_key: "change me later"
+beszel_agent_token: "change me later"
